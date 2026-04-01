@@ -22,19 +22,16 @@ def planner_node(state: State) -> State:
 
 
 def retrieve_node(state: State) -> State:
-    print("DEBUG: graph retrieve_node")
     state["docs"] = tool_retrieve(state["question"])
     return state
 
 
 def answer_node(state: State) -> State:
-    print("DEBUG: graph answer_node")
     state["answer"] = generate_answer(state["question"], state["docs"])
     return state
 
 
 def verify_node(state: State) -> State:
-    print("DEBUG: graph verify_node")
     try:
         state["verification"] = verify_answer(state["answer"], state["docs"])
     except Exception as e:
@@ -50,15 +47,16 @@ def decision_node(state: State) -> str:
 
 def build_graph():
     g = StateGraph(State)
-    g.add_node("plan", planner_node)
-    g.add_node("retrieve", retrieve_node)
-    g.add_node("answer", answer_node)
-    g.add_node("verify", verify_node)
 
-    g.set_entry_point("plan")
-    g.add_edge("plan", "retrieve")
-    g.add_edge("retrieve", "answer")
-    g.add_edge("answer", "verify")
-    g.add_conditional_edges("verify", decision_node, {"final": END})
+    g.add_node("planner_agent", planner_node)
+    g.add_node("retriever_agent", retrieve_node)
+    g.add_node("answer_agent", answer_node)
+    g.add_node("verifier_agent", verify_node)
+
+    g.set_entry_point("planner_agent")
+    g.add_edge("planner_agent", "retriever_agent")
+    g.add_edge("retriever_agent", "answer_agent")
+    g.add_edge("answer_agent", "verifier_agent")
+    g.add_conditional_edges("verifier_agent", decision_node, {"final": END})
 
     return g.compile()

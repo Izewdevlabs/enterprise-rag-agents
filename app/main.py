@@ -61,4 +61,9 @@ async def ask(req: AskRequest):
             ),
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Query failed: {e}")
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Ingestion failed: {type(e).__name__}: {str(e)}"
+        )
